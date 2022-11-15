@@ -49,6 +49,14 @@ namespace rational {
         return lhs + (-rhs);
     }
 
+    rational operator*(const rational& lhs, const rational& rhs) {
+        return rational(lhs.numerator * rhs.numerator, lhs.denominator * rhs.denominator).normalized();
+    }
+
+    rational operator/(const rational& lhs, const rational& rhs) {
+        return rational(lhs.numerator * rhs.denominator, lhs.denominator * rhs.numerator).normalized();
+    }
+
     std::ostream& operator<<(std::ostream& os, const rational& r) {
         if (r.denominator ==  1) {
             os << r.numerator;
