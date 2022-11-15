@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+constexpr int BASE = 10;
+
 namespace rational {
 
     class rational {
@@ -33,9 +35,7 @@ namespace rational {
         bool operator>(const rational& other) const;
 
         bool is_negative() const;
-        
     private:
-        const int BASE = 10; // constexpr?
         bool is_negative_ = false;
         std::vector<int> int_part_;
         std::vector<int> float_part_;

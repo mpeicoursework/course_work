@@ -27,3 +27,15 @@ TEST(utils_tests, test_function_add_trailing_zeros) {
     }
 }
 
+TEST(utils_tests, test_compare_vectors) {
+    std::vector<int> v1 = {1, 2, 3};
+    std::vector<int> v2 = {2, 3, 4};
+    ASSERT_TRUE(utils::compare_two_positive_vectors(v1, v2, [](int a, int b){
+        return a < b;
+    }));
+
+    std::vector<int> v3 = {5, 4, 3};
+    ASSERT_TRUE(utils::compare_two_positive_vectors(v3, v1, [](int a, int b){
+        return a > b;
+    }));
+}
