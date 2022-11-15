@@ -1,4 +1,13 @@
 .vscode
 .idea
-.cmake
-.txt
+*.cmake
+*.txt
+*.bazel
+*.make
+*.a
+*.o
+*.internal
+*.out
+*.tcl
+*.pc
+
