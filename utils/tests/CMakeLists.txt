@@ -3,11 +3,14 @@ enable_testing()
 
 add_executable(utils_tests ${UTILS_TESTS})
 
-target_link_libraries(
-        utils_tests
+target_link_libraries(utils_tests 
+        GTest::GTest
         gtest_main
-        utils
-)
+        utils)
 
-include(GoogleTest)
-gtest_discover_tests(utils_tests)
+add_test(test_function_convert_string_to_vector utils_tests)
+add_test(test_function_remove_leading_zeros utils_tests)
+add_test(test_function_add_trailing_zeros utils_tests)
+
+
+
