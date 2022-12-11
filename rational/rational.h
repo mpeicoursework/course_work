@@ -27,11 +27,12 @@ public:
     friend rational sum_positive_nums(const rational& lhs, const rational& rhs);
     friend rational diff_positive_nums(const rational& lhs, const rational& rhs);
 
-    friend bool operator==(const rational& lhs, const rational& rhs);
+    bool operator==(const rational& other) const;
     bool operator<=(const rational& other) const;
     bool operator>=(const rational& other) const;
     bool operator<(const rational& other) const;
     bool operator>(const rational& other) const;
+    bool operator!=(const rational& other) const;
 
     bool is_negative() const;
 private:
