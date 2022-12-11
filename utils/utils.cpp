@@ -17,7 +17,7 @@ namespace utils {
     }
 
     void add_trailing_zeros(std::vector<int>& v, int count_zeros) {
-        // maybe using deque here for optimization
+        // TODO: maybe using deque here for optimization
         for (int i = 0; i < count_zeros; ++i) {
             v.insert(v.begin(), 0);
         }
