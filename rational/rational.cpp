@@ -30,8 +30,29 @@ rational::rational(const big_int::big_int& numerator, const big_int::big_int& de
     is_signed_ = numerator_.is_signed() ^ denominator_.is_signed();        
 }
 
-bool operator==(const rational& lhs, const rational& rhs) {
-    return lhs.numerator_ == rhs.numerator_ && lhs.denominator_ == rhs.denominator_;
+bool rational::operator==(const rational& other) const {
+    return numerator_ == other.numerator_ && denominator_ == other.denominator_;
+}
+
+bool rational::operator<=(const rational& other) const {
+    return !(*this > other);
+}
+
+bool rational::operator>=(const rational& other) const {
+    return !(*this < other);
+}
+
+bool rational::operator<(const rational& other) const {
+    big_int::big_int lcm = big_int::lcm(denominator_, other.denominator_);
+    return (numerator_ * (lcm / denominator_)) < (other.numerator_ * (lcm / other.denominator_));
+}
+
+bool rational::operator>(const rational& other) const {
+    return (!(*this < other) && !(*this == other));
+}
+
+bool rational::operator!=(const rational& other) const {
+    return !(*this == other);
 }
 
 rational operator+(const rational& lhs, const rational& rhs) {
@@ -44,7 +65,7 @@ rational operator+(const rational& lhs, const rational& rhs) {
 } 
 
 rational operator-(const rational& lhs, const rational& rhs) {
-     big_int::big_int lcm = big_int::lcm(lhs.denominator_, rhs.denominator_);
+    big_int::big_int lcm = big_int::lcm(lhs.denominator_, rhs.denominator_);
     auto coef = [&](const rational& r) {
         return lcm / r.denominator_;
     };
@@ -75,7 +96,5 @@ rational rational::normalized() {
     denominator_ = denominator_ / gcd;
     return *this;
 }
-
-
 
 } // namespace rational
