@@ -1,2 +1,5 @@
 Dockerfile
 .git
+*.a
+*.so
+CMakeCache.txt
