@@ -15,6 +15,7 @@ public:
     big_int()=default;
     big_int(std::string s);
     big_int(const std::vector<int>& num) : num_(num) {};
+    big_int(const big_int& other);
 
     friend std::ostream& operator<<(std::ostream& os, const big_int& bi);
 
@@ -43,5 +44,8 @@ private:
     bool is_signed_ = false;
     std::vector<int> num_;
 };
+
+big_int gcd(const big_int& lhs, const big_int& rhs);
+big_int lcm(const big_int& lhs, const big_int& rhs);
 
 } // namespace big_int

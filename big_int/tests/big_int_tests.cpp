@@ -28,6 +28,8 @@ class TestForOperatorMinus : public ParametrizedTestFixtureForBigIntArithmeticOp
 class TestForOperatorMultiplication : public ParametrizedTestFixtureForBigIntArithmeticOperatorsTest {};
 class TestForOperatorDivision : public ParametrizedTestFixtureForBigIntArithmeticOperatorsTest {};
 class TestForOperatorRemainder : public ParametrizedTestFixtureForBigIntArithmeticOperatorsTest {};
+class TestForGCD : public ParametrizedTestFixtureForBigIntArithmeticOperatorsTest {};
+class TestForLCM : public ParametrizedTestFixtureForBigIntArithmeticOperatorsTest {};
 
 TEST_P(TestForOperatorPlus, TestOperatorPlus) {
     EXPECT_EQ(num1_ + num2_, expected_res_);
@@ -47,6 +49,15 @@ TEST_P(TestForOperatorDivision, TestOperatorDivision) {
 
 TEST_P(TestForOperatorRemainder, TestOperatorRemainder) {
     EXPECT_EQ(num1_ % num2_, expected_res_);
+}
+
+TEST_P(TestForGCD, TestGCD) {
+    EXPECT_EQ(big_int::gcd(num1_, num2_), expected_res_);
+}
+
+TEST_P(TestForLCM, TestLCM) {
+    std::cout << "lcm = " << big_int::lcm(num1_, num2_) << std::endl;
+    EXPECT_EQ(big_int::lcm(num1_, num2_), expected_res_);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -94,7 +105,8 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple("10", "3", "3"),
         std::make_tuple("121", "9", "13"),
         std::make_tuple("140", "-4", "-35"),
-        std::make_tuple("-140", "3", "-46")
+        std::make_tuple("-140", "3", "-46"),
+        std::make_tuple("80", "2", "40")
     )
 );
 
@@ -102,9 +114,28 @@ INSTANTIATE_TEST_SUITE_P(
     BigIntTests,
     TestForOperatorRemainder,
     ::testing::Values(
-        std::make_tuple("10", "5", "0"),
         std::make_tuple("10", "3", "1"),
         std::make_tuple("121", "9", "4")
+    )
+);
+
+INSTANTIATE_TEST_SUITE_P(
+    BigIntTests,
+    TestForGCD,
+    ::testing::Values(
+        std::make_tuple("48", "36", "12"),
+        std::make_tuple("25", "36", "1"),
+        std::make_tuple("18", "24", "6"),
+        std::make_tuple("42", "56", "14")
+    )
+);
+
+INSTANTIATE_TEST_SUITE_P(
+    BigIntTests,
+    TestForLCM,
+    ::testing::Values(
+        std::make_tuple("8", "10", "40"),
+        std::make_tuple("15", "20", "60")
     )
 );
 
