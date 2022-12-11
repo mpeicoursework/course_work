@@ -13,6 +13,7 @@ endif()
 
 add_subdirectory(rational)
 add_subdirectory(utils)
+add_subdirectory(big_int)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
