@@ -303,10 +303,6 @@ big_int gcd(const big_int& lhs, const big_int& rhs) {
 }
 
 big_int lcm(const big_int& lhs, const big_int& rhs) {
-    std::cout << "lhs = " << lhs << std::endl;
-    std::cout << "rhs = " << rhs << std::endl;
-    std::cout << "lhs * rhs = " << lhs * rhs << std::endl;
-    std::cout << "gcd = " << gcd(lhs, rhs) << std::endl;
     return (lhs * rhs) / gcd(lhs, rhs);
 }
 
@@ -320,6 +316,10 @@ std::ostream& operator<<(std::ostream& os, const big_int& bi) {
     }
 
     return os;
+}
+
+bool big_int::is_signed() const {
+    return is_signed_;
 }
 
 } // namespace big_int

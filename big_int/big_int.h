@@ -40,6 +40,8 @@ public:
     big_int& operator=(const big_int& other);
 
     big_int abs() const;
+
+    bool is_signed() const;
 private:
     bool is_signed_ = false;
     std::vector<int> num_;
