@@ -4,40 +4,41 @@
 #include <vector>
 #include <string>
 
-constexpr int BASE = 10;
+#include <big_int.h>
 
 namespace rational {
 
-    class rational {
-    public:
-        rational() = default;
-        rational(const std::vector<int>& int_part, const std::vector<int>& float_part);
-        rational(std::string num);
-        rational(std::string int_part, std::string float_part);
-        rational(float float_num);
-        rational(double double_num);
-        rational(long double long_double_num);
+class rational {
+public:
+    rational() = default;
+    rational(const std::string& s);
+    rational(const std::string& numerator, const std::string& denominator);
+    rational(const big_int::big_int& numerator, const big_int::big_int& denominator);
 
-        friend rational operator+(const rational& lhs, const rational& rhs);
-        friend rational operator-(const rational& lhs, const rational& rhs);
-        friend rational operator*(const rational& lhs, const rational& rhs);
-        friend rational operator/(const rational& lhs, const rational& rhs);
+    friend rational operator+(const rational& lhs, const rational& rhs);
+    friend rational operator-(const rational& lhs, const rational& rhs);
+    friend rational operator*(const rational& lhs, const rational& rhs);
+    friend rational operator/(const rational& lhs, const rational& rhs);
 
-        friend std::ostream& operator<<(std::ostream& os, const rational& r);
+    friend rational operator-(const rational& r);
 
-        friend rational sum_positive_nums(const rational& lhs, const rational& rhs);
-        friend rational diff_positive_nums(const rational& lhs, const rational& rhs);
+    friend std::ostream& operator<<(std::ostream& os, const rational& r);
 
-        bool operator==(const rational& other) const;
-        bool operator<=(const rational& other) const;
-        bool operator>=(const rational& other) const;
-        bool operator<(const rational& other) const;
-        bool operator>(const rational& other) const;
+    friend rational sum_positive_nums(const rational& lhs, const rational& rhs);
+    friend rational diff_positive_nums(const rational& lhs, const rational& rhs);
 
-        bool is_negative() const;
-    private:
-        bool is_negative_ = false;
-        std::vector<int> int_part_;
-        std::vector<int> float_part_;
-    };
+    friend bool operator==(const rational& lhs, const rational& rhs);
+    bool operator<=(const rational& other) const;
+    bool operator>=(const rational& other) const;
+    bool operator<(const rational& other) const;
+    bool operator>(const rational& other) const;
+
+    bool is_negative() const;
+private:
+    rational normalized();
+
+    bool is_signed_ = false;
+    big_int::big_int numerator_;
+    big_int::big_int denominator_;
+};
 } // namespace rational

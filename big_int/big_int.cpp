@@ -21,6 +21,11 @@ big_int::big_int(std::string s) {
     }
 }
 
+big_int::big_int(const big_int& other) {
+    num_ = other.num_;
+    is_signed_ = other.is_signed_;
+}
+
 bool big_int::operator==(const big_int& other) const {
     return is_signed_ == other.is_signed_ && num_ == other.num_;
 }
@@ -156,8 +161,6 @@ big_int operator/(const big_int& lhs, const big_int& rhs) {
 
 big_int operator%(const big_int& lhs, const big_int& rhs) {
     big_int division = lhs / rhs;
-    std::cout << "division = " << division << std::endl;
-    std::cout << "rhs * division = " << rhs * division << std::endl;
     return lhs - (rhs * division);
 }
 
@@ -192,7 +195,6 @@ big_int sum_positive_nums(const big_int& lhs, const big_int& rhs) {
 
 big_int diff_positive_nums(const big_int& lhs, const big_int& rhs) {
     if (lhs == rhs) {
-        std::cout << "if equality " << std::endl;
         return big_int("0");
     }
     std::vector<int> num;
@@ -266,9 +268,6 @@ big_int divide_positive_nums(const big_int& lhs, const big_int& rhs) {
             ++res.num_[i];
         }
         --res.num_[i];
-        if (res.num_[i] == 0) {
-            res.num_.pop_back();
-        }
     }
 
     utils::remove_leading_zeros(res.num_);
@@ -290,6 +289,23 @@ big_int big_int::abs() const {
     return big_int(num_);
 }
 
+big_int gcd(const big_int& lhs, const big_int& rhs) {
+    big_int a = lhs;
+    big_int b = rhs;
+    while (a != b) {
+        if (a > b) {
+            a = a - b;
+        } else {
+            b = b - a;
+        }
+    }
+    return a;
+}
+
+big_int lcm(const big_int& lhs, const big_int& rhs) {
+    return (lhs * rhs) / gcd(lhs, rhs);
+}
+
 std::ostream& operator<<(std::ostream& os, const big_int& bi) {
     if (bi.is_signed_) {
         os << "-";
@@ -300,6 +316,10 @@ std::ostream& operator<<(std::ostream& os, const big_int& bi) {
     }
 
     return os;
+}
+
+bool big_int::is_signed() const {
+    return is_signed_;
 }
 
 } // namespace big_int

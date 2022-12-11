@@ -1,10 +1,12 @@
 set(RATIONAL_TESTS rational_tests.cpp)
 enable_testing()
 
-add_executable(rational_tests ${RATIONAL_TESTS})
+add_executable(RationalTests ${RATIONAL_TESTS})
 
-target_link_libraries(rational_tests 
+target_link_libraries(RationalTests 
         GTest::GTest
         gtest_main
         rational
 )
+
+add_test(RationalTests RationalTests)
