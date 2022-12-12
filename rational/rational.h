@@ -50,6 +50,10 @@ public:
     bool operator>(const rational& other) const;
     bool operator!=(const rational& other) const;
 
+    float get_float() const;
+    double get_double() const;
+    long double get_long_double() const;
+
     bool is_negative() const;
 private:
     rational normalized();

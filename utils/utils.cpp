@@ -16,6 +16,15 @@ namespace utils {
         }
     }
 
+    std::string make_string_from_vector(const std::vector<int>& v) {
+        std::string s;
+        s.reserve(v.size());
+        for (int64_t i = v.size() - 1; i >= 0; --i) {
+            s.push_back(v[i] + '0');
+        }
+        return s;
+    } 
+
     void add_trailing_zeros(std::vector<int>& v, int count_zeros) {
         // TODO: maybe using deque here for optimization
         for (int i = 0; i < count_zeros; ++i) {

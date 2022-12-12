@@ -42,6 +42,9 @@ public:
 
     big_int abs() const;
 
+    int get_int() const;
+    int64_t get_long() const;
+
     bool is_signed() const;
 private:
     bool is_signed_ = false;

@@ -1,6 +1,7 @@
 #include <big_int.h>
 
 #include <algorithm>
+#include <limits>
 
 namespace big_int
 {
@@ -320,6 +321,30 @@ std::ostream& operator<<(std::ostream& os, const big_int& bi) {
 
 bool big_int::is_signed() const {
     return is_signed_;
+}
+
+// TODO: following two methods contains duplicate code, needed remove duplication
+
+int big_int::get_int() const {
+    std::string s_max_int = std::to_string(std::numeric_limits<int>::max());
+    big_int abs_val = abs();
+    std::string s_abs_val = utils::make_string_from_vector(abs_val.num_);
+    if (s_abs_val > s_max_int) {
+        throw std::range_error("num out of range int");
+    }
+    int res = std::stoi(s_abs_val);
+    return is_signed_ ? -res : res;
+}
+
+int64_t big_int::get_long() const {
+    std::string s_max_int = std::to_string(std::numeric_limits<int64_t>::max());
+    big_int abs_val = abs();
+    std::string s_abs_val = utils::make_string_from_vector(abs_val.num_);
+    if (s_abs_val > s_max_int) {
+        throw std::range_error("num out of range long");
+    }
+    int64_t res = std::stoll(s_abs_val);
+    return is_signed_ ? -res : res;
 }
 
 } // namespace big_int

@@ -1,6 +1,7 @@
 #include <rational.h>
 
 #include <algorithm>
+#include <utility>
 #include <utils.h>
 #include <iostream>
 
@@ -37,6 +38,18 @@ rational::rational(long long numerator, long long denominator) :
 
 rational::rational(const rational& other) : numerator_(other.numerator_),
     denominator_(other.denominator_), is_signed_(other.is_signed_) {}
+
+rational::rational(float float_num) {
+
+}
+
+rational::rational(double double_num) {
+
+}
+
+rational::rational(long double long_double_num) {
+
+}
 
 bool rational::operator==(const rational& other) const {
     return numerator_ == other.numerator_ && denominator_ == other.denominator_;
@@ -152,4 +165,21 @@ rational rational::normalized() {
     return *this;
 }
 
-} // namespace rational
+// TODO: the following three methods contains duplicate code, neeeded remove him
+
+float rational::get_float() const {
+    // TODO: exception needed to be throw
+    return static_cast<float>(numerator_.get_int()) / static_cast<float>(denominator_.get_int());
+}
+
+double rational::get_double() const {
+    // TODO: exception needed to be throw
+    return static_cast<double>(numerator_.get_long()) / static_cast<double>(denominator_.get_long());
+}
+
+long double rational::get_long_double() const {
+    // TODO: exception needed to be throw
+    return static_cast<double>(numerator_.get_long()) / static_cast<double>(denominator_.get_long());
+}
+
+} // namespace rationalg

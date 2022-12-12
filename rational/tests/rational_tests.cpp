@@ -52,3 +52,18 @@ INSTANTIATE_TEST_SUITE_P(
     )
 );
 
+
+class TestFixtureForGetDoubleMethod : public ::testing::TestWithParam<std::tuple<rational::rational, double>> {};
+
+TEST_P(TestFixtureForGetDoubleMethod, DoubleMethodTest) {
+    auto [num, expected_res] = GetParam();
+    EXPECT_EQ(num.get_double(), expected_res);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    RationalTests,
+    TestFixtureForGetDoubleMethod,
+    ::testing::Values(
+        std::make_tuple(rational::rational("1/4"), 0.25)
+    )
+);

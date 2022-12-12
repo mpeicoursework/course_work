@@ -223,4 +223,19 @@ INSTANTIATE_TEST_SUITE_P(
     )
 );
 
+class TestFixtureForGetIntMethod : public ::testing::TestWithParam<std::tuple<big_int::big_int, int>> {};
 
+TEST_P(TestFixtureForGetIntMethod, TestGetIntMethod) {
+    auto [num, expected_res] = GetParam();
+    ASSERT_NO_THROW(num.get_int());
+    EXPECT_EQ(num.get_int(), expected_res);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    BigIntTests,
+    TestFixtureForGetIntMethod,
+    ::testing::Values(
+        std::make_tuple(big_int::big_int("1234"), 1234),
+        std::make_tuple(big_int::big_int("-12301"), -12301)
+    )
+);
