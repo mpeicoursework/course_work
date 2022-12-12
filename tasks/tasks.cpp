@@ -1,5 +1,10 @@
 #include <tasks.h>
 
+#include <iostream>
+#include "stdio.h"
+#include "string.h"
+#include "math.h"
+
 namespace tasks {
     rational::rational pow(rational::rational basis, int exponent) {
         if (exponent == 0)
