@@ -14,13 +14,28 @@ public:
     rational(const std::string& s);
     rational(const std::string& numerator, const std::string& denominator);
     rational(const big_int::big_int& numerator, const big_int::big_int& denominator);
+    rational(long long numerator_, long long denominator_);
+    rational(float float_num);
+    rational(double double_num);
+    rational(long double long_double_num);
 
     friend rational operator+(const rational& lhs, const rational& rhs);
     friend rational operator-(const rational& lhs, const rational& rhs);
     friend rational operator*(const rational& lhs, const rational& rhs);
     friend rational operator/(const rational& lhs, const rational& rhs);
 
+    friend rational operator+(const rational& lhs, long long rhs);
+    friend rational operator-(const rational& lhs, long long rhs);
+    friend rational operator*(const rational& lhs, long long rhs);
+    friend rational operator/(const rational& lhs, long long rhs);
+
+    rational operator+=(const rational& other);
+    rational operator-=(const rational& other);
+    rational operator*=(const rational& other);
+    rational operator/=(const rational& other);
+
     friend rational operator-(const rational& r);
+    friend rational abs(const rational& number);
 
     friend std::ostream& operator<<(std::ostream& os, const rational& r);
 

@@ -30,6 +30,11 @@ rational::rational(const big_int::big_int& numerator, const big_int::big_int& de
     is_signed_ = numerator_.is_signed() ^ denominator_.is_signed();        
 }
 
+rational::rational(long long numerator, long long denominator) :
+    numerator_(std::to_string(numerator)), denominator_(std::to_string(denominator)) {
+        normalized();
+    }
+
 bool rational::operator==(const rational& other) const {
     return numerator_ == other.numerator_ && denominator_ == other.denominator_;
 }
@@ -53,6 +58,22 @@ bool rational::operator>(const rational& other) const {
 
 bool rational::operator!=(const rational& other) const {
     return !(*this == other);
+}
+
+rational rational::operator+=(const rational& other) {
+    return *this = *this + other;
+}
+    
+rational rational::operator-=(const rational& other) {
+    return *this = *this - other;
+}
+    
+rational rational::operator*=(const rational& other) {
+    return *this = *this * other;
+}
+
+rational rational::operator/=(const rational& other) {
+    return *this = *this / other;
 }
 
 rational operator+(const rational& lhs, const rational& rhs) {
@@ -81,6 +102,22 @@ rational operator/(const rational& lhs, const rational& rhs) {
     return rational(lhs.numerator_ * rhs.denominator_, lhs.denominator_ * rhs.numerator_).normalized();
 }
 
+rational operator+(const rational& lhs, long long rhs) {
+    return lhs + rational(rhs, 1);
+}
+
+rational operator-(const rational& lhs, long long rhs) {
+    return lhs - rational(rhs, 1);
+}
+
+rational operator*(const rational& lhs, long long rhs) {
+    return lhs * rational(rhs, 1);
+}
+
+rational operator/(const rational& lhs, long long rhs) {
+    return lhs / rational(rhs, 1);
+}
+
 std::ostream& operator<<(std::ostream& os, const rational& r) {
     if (r.denominator_ ==  big_int::big_int("1")) {
         os << r.numerator_;
@@ -89,6 +126,11 @@ std::ostream& operator<<(std::ostream& os, const rational& r) {
     }
     return os;
 }
+
+rational abs(const rational& number) {
+    return number.is_negative() ? -number : number;
+}
+
 
 rational rational::normalized() {
     big_int::big_int gcd = big_int::gcd(numerator_, denominator_);

@@ -16,6 +16,7 @@ public:
     big_int(std::string s);
     big_int(const std::vector<int>& num) : num_(num) {};
     big_int(const big_int& other);
+    // TODO: int/long long init
 
     friend std::ostream& operator<<(std::ostream& os, const big_int& bi);
 
