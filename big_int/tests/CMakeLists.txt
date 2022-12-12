@@ -1,4 +1,5 @@
 set(BIG_INT_TESTS big_int_tests.cpp)
+enable_testing()
 
 add_executable(BigIntTests ${BIG_INT_TESTS})
 

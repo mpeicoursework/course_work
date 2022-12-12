@@ -14,6 +14,7 @@ endif()
 add_subdirectory(rational)
 add_subdirectory(utils)
 add_subdirectory(big_int)
+add_subdirectory(tasks)
 
 add_executable(${PROJECT_NAME} main.cpp)
 
@@ -21,6 +22,7 @@ target_link_libraries(
     ${PROJECT_NAME}
     rational
     big_int
+    tasks
 )
 
 
