@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <rational.h>
+#include <tasks.h>
 
 namespace cubic_spline {
 
@@ -20,7 +21,7 @@ public:
 private:
     int N_ = 10;
     double left_ = 0, right_ = 2 * M_PI, h = (right_ - left_) / N_;
-    double (*f_)(double);
+    double (*f_)(double) = sin;
 
     std::vector<rational::rational> x,y;
 

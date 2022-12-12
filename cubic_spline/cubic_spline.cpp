@@ -1,6 +1,7 @@
 #include <cubic_spline.h>
 
 #include <vector>
+#include <iostream>
 
 namespace cubic_spline {
     cubic_spline::cubic_spline(double left, double right): left_(left), right_(right) { h = (right_ - left) / N_; }
@@ -36,7 +37,8 @@ namespace cubic_spline {
 
     std::vector<rational::rational> cubic_spline::make_spline_vector() {
         int n = N_;
-        auto v = std::vector<rational::rational>(n, 1.0);
+        auto v = std::vector<rational::rational>(n, rational::rational("1/1"));
+        std::cout << "Here\n";
         for (int i = 0; i < n; ++i) {
             v[i - 1] = (1 / h / h * (y[i] - y[i - 1]) + 1 / h / h * (y[i + 1] - y[i])) * 3;
         }
@@ -49,9 +51,10 @@ namespace cubic_spline {
     rational::rational cubic_spline::calculate_spline(rational::rational t) {
         int n = N_;
         std::vector<std::vector<rational::rational> > A = make_spline_matrix();
-        std::vector<rational::rational> b = make_spline_vector();
-        std::vector<rational::rational> s;
-        // std::vector<rational::rational> s = solve_sle(A, b);  TODO: use LU
+        std::vector<rational::rational> b = make_spline_vector(); 
+        auto [L, U] = tasks::LUDecomposition(A, rational::rational("0/1"), rational::rational("1/1"));
+        std::vector<rational::rational> s = tasks::LUSolution(L, U, b);
+
         int i = 0;
         // TODO: maybe binary search ?
         for (int j = 1; j < n && !i; ++j) {

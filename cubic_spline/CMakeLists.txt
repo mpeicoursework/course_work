@@ -9,4 +9,5 @@ target_include_directories(
 target_link_libraries(
     cubic_spline
     rational
+    tasks
 )

@@ -4,6 +4,8 @@
 #include <utility>
 #include <utils.h>
 #include <iostream>
+#include <string>
+#include <math.h>
 
 namespace rational {
 rational::rational(const std::string& s) {
@@ -39,16 +41,22 @@ rational::rational(long long numerator, long long denominator) :
 rational::rational(const rational& other) : numerator_(other.numerator_),
     denominator_(other.denominator_), is_signed_(other.is_signed_) {}
 
-rational::rational(float float_num) {
-
+rational::rational(float number) {
+    rational((long double)number);
 }
 
-rational::rational(double double_num) {
-
+rational::rational(double number) {
+    rational((long double)number);
 }
 
-rational::rational(long double long_double_num) {
-
+rational::rational(long double number_) {
+    std::string number = std::to_string(number_);
+    int dot_index = number.find(".");
+    int approximation = 6;
+    std::string approx_number = number.substr(0, dot_index + approximation);
+    long long denominator = pow(10, approximation);
+    long long numerator = std::stoi(approx_number) * denominator;
+    rational(numerator, denominator);
 }
 
 bool rational::operator==(const rational& other) const {

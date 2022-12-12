@@ -1,5 +1,6 @@
 #include <rational.h>
 #include <tasks.h>
+#include <cubic_spline.h>
 
 #include <iostream>
 
@@ -48,6 +49,10 @@ int main() {
     std::cout << "x[0] = " << x[0] << std::endl;
     std::cout << "x[1] = " << x[1] << std::endl;
     std::cout << "x[2] = " << x[2] << std::endl;
+
+    cubic_spline::cubic_spline cs;
+    
+    std::cout << cs.calculate_spline(1.0);
 
     return 0;
 }
