@@ -18,6 +18,7 @@ public:
     rational(float float_num);
     rational(double double_num);
     rational(long double long_double_num);
+    rational(const rational& other);
 
     friend rational operator+(const rational& lhs, const rational& rhs);
     friend rational operator-(const rational& lhs, const rational& rhs);
