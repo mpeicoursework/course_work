@@ -1,0 +1,868 @@
+% ОБЯЗАТЕЛЬНО ИМЕННО ТАКОЙ documentclass!
+% (Основной кегль = 14pt, поэтому необходим extsizes)
+% Формат, разумеется, А4
+% article потому что стандарт не подразумевает разделов
+% Глава = section, Параграф = subsection
+% (понятия "глава" и "параграф" из документа, описывающего диплом)
+\documentclass[a4paper,article,14pt]{extarticle}
+
+% Подключаем главный пакет со всем необходимым
+\usepackage{spbudiploma_tempora}
+
+% Пакеты по желанию (самые распространенные)
+% Хитрые мат. символы
+\usepackage{euscript}
+% Таблицы
+\usepackage{longtable}
+\usepackage{makecell}
+% Картинки (можно встявлять даже pdf)
+\usepackage[pdftex]{graphicx}
+
+\usepackage{amsthm,amssymb, amsmath}
+\usepackage{textcomp}
+
+% include code package
+\usepackage{listings}
+
+% include package for nice matrix view
+\usepackage{nicematrix}
+
+
+\begin{document}
+
+% Титульник в файле titlepage.tex
+\input{titlepage_example.tex}
+
+% Table of contents
+\tableofcontents
+\pagebreak
+
+\specialsection{Введение}
+
+Задачи численного решения тех или иных математических задач возникают во многих инженерных, технических задачах.
+В качестве примера можно привести такие популярные библиотеки для машинного обучения как \emph{Tensorflow}, 
+\emph{Pytorch}, \emph{CatBoost}.
+В них особенно важную часть занимает численное решение СЛАУ. 
+Поэтому очень важно иметь специализированные математические пакеты, способные решать данного вида задачи. 
+Наша курсовая работа посвящена разработке библиотеки на языке \emph{C++},
+содержащую в себе реализацию класса рациональных чисел и методы
+численного решения различных математических задач \\
+
+\textbf{Актуальность заявленной темы} заключается в том,
+что каждый день многих специалисты, такие как инженеры, ученые, программисты
+и другие сталкиваются в своей работе с различными математическими задачи.
+И поэтому наличия специализированного математического пакета,
+который позволяет работать с рациональными числами и решать с помощью них 
+различные задачи могло бы во многом упростить работу таким людям. \\
+
+\textbf{Основная цель работы:} разработать математический пакет,
+содержащий в себе реализацию класса рациональных чисел и решение 
+различных математических задач с помощью написанного класса. \\
+
+\textbf{Задачи:} 
+
+\begin{itemize}
+    \item Реализовать класс рациональных чисел
+    \item С помощью написанного класса реализовать возведение числа в рациональную степень
+    \item Реализовать решения СЛАУ $Ax = b$ с помощью $LU$ - разложения, используя написанный класс
+    \item Реализовать функции в виде кубического сплайна для синуса и косинуса, вычисляющие значения рационального числа с точностью $10^{-12}$
+\end{itemize}
+
+
+\section{Реализация класса рациональных чисел}
+
+\subsection{Длинная арифметика}
+
+Для реализация класса рациональных чисел необходимо реализовать класс
+для длинной арифметики целых чисел. В данной секции пойдет речь о нашей 
+реализации данного класса. Реализация во многом будет основана на примере из книг \cite{2}, \cite{3}
+
+\subsubsection{Хранение чисел} 
+Для хранения числа мы используем массив, в котором число храниться в перевернутом в виде
+
+\textbf{Пример:} Число 1234 будет храниться в массиве $ [4, 3, 2, 1] $ 
+
+О преимуществах такого подхода будет написано ниже. Также для хранения знака 
+числа мы завели булевую переменную \emph{is\_signed}. Она истина, если 
+число отрицательное и ложна в противном случае
+
+Псевдокод нашего класса
+
+\begin{lstlisting}
+    class BigInt:
+        num: array // Array contains num
+        is_signed: bool // Bool variable contains sign num
+\end{lstlisting}
+
+
+\subsubsection{Арифметические операции с числами}
+
+\textbf{Сложение чисел}
+
+Сложение чисел осуществляется по школьным правилам, складываем
+каждый разряд числа и если возникает перенос, то запоминаем его и переносим в 
+следующие разряд. Вот тут и проявляется преимущество подхода хранения числа
+в перевернутом в виде. Так как если перенос возникнет в самом конце, то будет достаточно
+добавить в массив новый элемент в конец. Данная операция как известно имеет 
+алгоритмическую сложность \emph{O(1)}. И если хранить число, в том виде, в котором 
+оно записано, то надо будет добавлять элемент в начало массива и данная 
+операция уже как известно занимает \emph{O(n)}, где \emph{n} - длина массива.
+
+Псевдокод данного алгоритма
+
+\begin{lstlisting}
+    function sum_nums(lhs: BigInt, rhs: BigInt):
+        carry = 0 
+        res = []
+        for i = 0 ... min(lhs.num.size(), rhs.num.size()):
+            s = lhs.num[i] + rhs.num[i] + carry
+            res.append(s % 10)
+            carry = s / 10
+        for i = min(lhs.num.size(), rhs.num.size()) 
+            ... max(lhs.num.size(), rhs.num.size()):
+            if lhs.num.size() > rhs.num.size():
+                s = lhs.num[i] + carry
+                res.append(s % 10)
+                carry = s / 10
+            else:
+                s = rhs.num[i] + carry
+                res.append(s % 10)
+                carry = s / 10
+        return res
+\end{lstlisting}
+
+Алгоритмическая сложность данного алгоритма очевидно, что составляет \emph{O(n)}
+
+\textbf{Вычитание чисел}
+
+Вычитание числа мы также будет производить по школьным правилам. Вычитаем поразрядно и если возникает
+отрицательное значение в каком то отряде, то очевидно что надо это будет учесть в следующем разряде и вычесть 
+из него единицу.
+
+Псевдокод данного алгоритма
+
+\begin{lstlisting}
+    function diff_nums(lhs: BigInt, rhs: BigInt):
+        carry = 0
+        res = []
+        for i = 0 ... min(lhs.num.size(), rhs.num.size()):
+            s = lhs.num[i] - rhs.num[i] - carry
+            if s < 0:
+                s += 10
+                carry = -1
+            else:
+                carry = 0
+            res.append(s % 10)
+        
+        for i = min(lhs.num.size(), rhs.num.size()) 
+            ... max(lhs.num.size(), rhs.num.size()):
+            if lhs.num.size() > rhs.num.size():
+                s = lhs.num[i] - carry
+                if s < 0:
+                    s += 10
+                    carry = -1
+                else:
+                    carry = 0
+                res.append(s % 10)
+            else:
+                s = rhs.num[i] - carry
+                if s < 0:
+                    s += 10
+                    carry = -1
+                else:
+                    carry = 0
+                res.append(s % 10)
+
+        return res
+\end{lstlisting}
+
+
+Очевидно, что алгоритмическая сложность данного алгоритма составляет \emph{O(n)}
+
+\textbf{Умножение чисел}
+
+Распишем два числа lhs, rhs в виде суммы их разрядов
+
+\begin{equation}
+    lhs = lhs[0] \cdot 10^0 + lhs[1] \cdot 10^1 + \dots + lhs[n] \cdot 10^n
+\end{equation}
+\begin{equation}
+    rhs = rhs[0] \cdot 10^0 + rhs[1] \cdot 10^1 + \dots + rhs[m] \cdot 10^m
+\end{equation}
+
+Теперь распишем результат их умножения
+
+\begin{equation}
+    \begin{split}
+        lhs \cdot rhs = \left(lhs[0] \cdot 10^0 + lhs[1] \cdot 10^1 + \dots + lhs[n] \cdot 10^n \right) \cdot \\
+        \cdot \left(rhs[0] \cdot 10^0 + rhs[1] \cdot 10^1 + \dots + lhs[m] \cdot 10^m \right) = \\
+        = lhs[0] \cdot rhs[0] + lhs[0] \cdot rhs[1] \cdot 10^1  + \dots + lhs[0] \cdot rhs[m] \cdot 10^m  + \\
+        + \dots + lhs[n] \cdot rhs[0] \cdot 10^n + lhs[n] \cdot rhs[1] \cdot 10 ^ {n + 1} + \dots + lhs[n] \cdot rhs[m] \cdot 10 ^ {n + m}
+    \end{split}
+\end{equation}
+
+Тогда получаем что результат умножения чисел на $i + j$ разряде будет равен $ res[i + j]  = lhs[i] \cdot rhs[j] $,
+где $i$ изменяется от 0 до n, $j$ от 0 до m 
+
+Напишем псевдокод данного алгоритма
+
+\begin{lstlisting}
+    function product_nums(lhs: BigInt, rhs: BigInt):
+        res = [0] * (lhs.size() + rhs.size())
+        carry = 0
+        for i = 0 ... lhs.size():
+            for j = 0 ... rhs.size():
+                res[i + j] += carry + lhs[i] * rhs[j]
+                carry = res[i + j] / 10
+                res[i + j] %= 10  
+        return res
+\end{lstlisting}
+
+Очевидно, что сложность данного алгоритма \emph{O($n^2$)}.
+Хотелось бы получить улучшение данного алгоритма с точки зрения алгоритмической сложности.
+Одно из таких улучшений это \textbf{Алгоритм быстрого умножения Карацубы}
+
+Пусть имеем два числа $A$, $B$ одинаковой длины $n$ и основанием 
+в системе счисления $t$. 
+
+Распишем число $A$ подробно
+
+\begin{equation}
+    \begin{split}
+        A = a_{n - 1} \cdot t^{n - 1} + a_{n - 2} \cdot t^{n - 2} + \dots + a_1 \cdot t + a_0 = \\
+        = \left(a_{n - 1} \cdot t^{n - 1} + a_{n - 2} \cdot t^{n - 2} + \dots + a_{n // 2} \cdot t^{n // 2}  \right) + \\
+        + \left(a_{n // 2 - 1} \cdot t ^ {n // 2 - 1} + a_{n // 2 - 2} \cdot t ^ {n // 2 - 2} + \dots a_0 \right) = \\
+        = t ^ {n // 2} \left(a_{n - 1} \cdot t ^ {n // 2 - 1} + \dots + a_{n // 2} \right) + \\ 
+        + \left(a_{n // 2 - 1} \cdot t ^ {n // 2 - 1} + \dots a_0 \right) = Pt^{n // 2} + Q \\
+        P = a_{n - 1} \cdot t ^ {n // 2 - 1} + a_{n - 2} \cdot t ^ {n // 2 - 2}  + \dots + a_{n // 2} \\
+        Q = a_{n // 2 - 1} \cdot t ^ {n // 2 - 1} + a_{n // 2 - 2} \cdot t ^ {n // 2 - 2} + \dots a_0 \\
+    \end{split}
+\end{equation}
+
+$ n // 2$ - целая часть от деления числа на число 2. Такие же преобразования можно провести и с числом $B$.
+Запишем его в таком же в виде как $A$. $ B = Rt^{n // 2} + S $
+
+Теперь перемножим числа в таком виде 
+
+\begin{equation}
+    \begin{split}
+    AB = \left(Pt^{n // 2} + Q \right)\left(Rt^{n // 2 } + S\right) = \\
+    = PR + \left(PS + QR\right)t^{n // 2} + QS
+    \end{split}
+\end{equation}
+
+
+Имеем на данном этапе, что мы разбили умножение двух чисел на три умножения и два сложения.
+Применим следующий прием. Введем следующие обозначения
+
+\begin{equation}
+    \begin{split}
+        X &= (P + Q)(R + S) = PR + PS + QR + QS \\
+        Y &= PR \\
+        Z &= QS 
+    \end{split}
+\end{equation}
+
+Тогда в наших обозначениях получим следующую формулу для умножения чисел
+
+\begin{equation}
+    AB = Yt^{n} + (X - Y - Z)t^{n // 2} + Z
+\end{equation}
+
+В итоге имеем 6 операций сложения(вычитания) и 3 операции умножения
+
+Покажем на простом примере как работает данный алгоритма
+
+\textbf{Пример: } Перемножим два числа $ A = 1234 $, $ B = 5678 $
+
+\begin{equation}
+    \begin{split}
+        &P = 12 \\
+        &Q = 34 \\
+        &R = 56 \\
+        &S = 78 \\
+        &X = (P + Q)(R + S) = (12 + 34)(56 + 78) = 46 \cdot 134 = 6164 \\
+        &Y = PR = 12 \cdot 56 = 672 \\
+        &Z = QS = 34 \cdot 78 = 2652 \\
+        &X - Y - Z = 6164 - 2652 - 672 = 2840 \\
+        &AB = 672 \cdot 10^4 + 2840 \cdot 10^2 + 2652 = 7006652 \\
+    \end{split}
+\end{equation}
+
+На примере был показан не полный алгоритм Карацубы, так как можно дальше
+продолжить рекурсию, для подсчетов $3$-х произведений.
+
+Напишем псевкодод данного алгоритма
+\begin{lstlisting}
+    function product_nums2(A: BigInt, B: BigInt):
+        if A.num.size() == 1 or B.num.size() == 1:
+            return product_nums1(A, B)
+        
+        n = max(A.num.size(), B.num.size())
+        half = n // 2
+        P = a[n // 2:]
+        Q = a[:n // 2]
+        R = b[n // 2:]
+        S = b[n // 2:]
+        X = product_nums2(sum_nums(P, Q), sum_nums(R, S))
+        Y = product_nums2(P, R)
+        Z = product_nums2(Q, S)
+
+        s1, s2, s3 = [0] * n * 2, [0] * n * 2, [0] * n * 2
+        for n + len(Y) - 1 ... n:
+            s1[i] = Y[i - n - 1]
+            
+        diff = diff_nums(X, diff_nums(Y, Z))    
+        
+        for n // 2 + len(diff) - 1 ... n // 2:
+            s2[i] = diff[i - n // 2]
+        
+        for i len(Z) - 1 ... 0:
+            s3[i] = Z[i]
+        
+        return sum_nums(s1, sum_nums(s2, s3))
+\end{lstlisting}
+
+Сложность данного алгоритма \emph{O($n^{log_2{3}}$)}
+
+\textbf{Деление чисел}
+
+Для деления числа, воспользуемся следующей идеей. 
+Пусть мы делим число $A$ на число $B$ и получаем некоторое число $C$. 
+Можно утверждать, что количество цифр в данном числе будет порядка 
+$ Count\_digits(A) - Count\_digits(B) + 1 $. 
+Где $ Count\_digits(.)$ - количество цифр в данном числе
+
+В числе $C = c_{n - 1}c_{n - 2}...c_0$ будем перебирать 
+его разряды $c_{n - 1}$ до $c_0$ пока не получим уменьшения числа до нужного.
+
+Псевдокод данного алгоритма
+
+\begin{lstlisting}
+    function divide_nums(a: BigInt, b: BigInt):
+        res = [0] * (a.num.size() - b.num.size())
+        for i = res.size() - 1 ... 0:
+            while product_nums(b, res) < a:
+                res.num[i] += 1
+            res.num[i] -= 1
+        return res
+\end{lstlisting}
+
+
+\subsubsection{Операции сравнения}
+
+Операции сравнения похожи своей реализацией друг на друга. Поэтому приведем в 
+данном примере реализацию только операции меньше. Сначала мы сравниваем два числа по длине,
+очевидно, что если левое число меньше по длине то результат операции истинен, иначе ложен
+Далее мы сравниваем числа поразрядно, если нашли несовпадение в соответствующих разрядах,
+то уже можно сразу делать вывод об результате операции. Псевдокод данного алгоритма
+
+\begin{lstlisting}
+    function less(a: BigInt, b: BigInt):
+        if a.num.size < b.num.size:
+            return true
+        else if a.num.size > b.num.size:
+            return false
+
+        for i = 0 ... a.num.size():
+            if a[i] > b[i]:
+                return false        
+        return true
+\end{lstlisting}
+
+Очевидно, что сложность данной операции \emph{O(n)}
+
+\subsubsection{Реализация поиск наименьшего общего кратного и наибольшего общего делителя}
+
+Для работы с рациональными числами необходимо уметь находить наименьшее общее кратное
+и наибольший общий делитель.
+
+Для поиска наибольшего общего делителя был выбран алгоритм Евклида, известный всем еще со 
+школы. Алгоритм основывается на том факте, что $ GCD(A, B) = GCD(A - B, B) $
+Где $ GCD(A, B) $ - наибольший общий делитель чисел $A$ и $B$. Получается мы можем вычитать из большего числа меньшее, 
+пока не получим результат, что они сравнялись
+
+Псевдокод данного алгоритма
+
+\begin{lstlisting}
+    function GCM(A: BigInt, B: BigInt):
+        while A != B:
+            if A > B:
+                A -= B
+            else:
+                B -= A
+        return A
+\end{lstlisting}
+
+
+Для реализации наименьшего общего кратного воспользуемся следующей формулой $ LCM(A, B) = \frac{AB}{GCD(A, B)} $ 
+
+Псевдокод данного алгоритма
+\begin{lstlisting}
+    function LCM(A: BigInt, B: BigInt):
+        return (A * B) / GCD(A, B)
+\end{lstlisting}
+
+\subsection{Реализация рациональных чисел}
+
+Рациональное число мы храним в виде набора двух элементов класса \emph{BigInt}
+Храним числитель(\emph{numerator}) и знаменатель (\emph{denominator}).
+
+\subsubsection{Хранение рационального числа}
+
+Псевдокод данного класс
+\begin{lstlisting}
+    class Rational:
+        numerator: BigInt
+        denominator: BigInt    
+\end{lstlisting}
+
+\subsubsection{Реализация арифметических операций}
+
+\textbf{Нормализация числа}
+
+Для реализации арифметических операций, нам понадобятся 
+вспомогательная операция нормализация числа, то есть приведение дроби
+к несокращаемому виду. Для этого нам нужно найти наибольший обший делитель числителя и 
+знаменателя и поделить на него числитель, знаменатель
+
+\begin{lstlisting}
+    function normalize(r: Rational):
+        gcd = GCD(r.numerator, r.denominator)
+        r.numerator /= gcd
+        r.denominator /= gcd
+\end{lstlisting}
+
+\textbf{Сложение и вычитание}
+
+Для того, чтобы сложить или вычесть два рациональных числа. Необходимо найти
+наименьшее общее кратное двух знаменателей. И это будет знаменатель полученного
+числа, а потом умножить числитель каждого числа на наименьшее общее кратное двух чисел поделить на знаменатель
+
+Псевдокод функции сложения
+
+\begin{lstlisting}
+    function sum(r1: Rational, r2: Rational):
+        lcm = LCM(r1.denominator, r2.denominator)
+        function coef(r: rational):
+            return lcm / r.denominator
+        numerator = r1.numerator * coef(r1) + r2.numerator * coef(r2)
+        return normalize(Rational(numerator, lcm))
+\end{lstlisting}
+
+Псевдокод функции вычитания
+
+\begin{lstlisting}
+    function diff(r1: Rational, r2: Rational):
+        lcm = LCM(r1.denominator, r2.denominator)
+        function coef(r: rational):
+            return lcm / r.denominator
+        numerator = r1.numerator * coef(r1) 0 r2.numerator * coef(r2)
+        return normalize(Rational(numerator, lcm))
+\end{lstlisting}
+
+\textbf{Умножение}
+
+Операцию умножения реализуется по школьному правилу, 
+считает произведение числителя на числитель, знаменателя на знаменатель.
+Псевдокод данного алгоритма
+
+\begin{lstlisting}
+function product(r1: Rational, r2: Rational):
+    return normalize(Rational(r1.numerator * r2.numerator, 
+    r1.denominator * r2.denominator))
+\end{lstlisting}
+
+\textbf{Деление}
+
+Деление, умножаем одну дробь на другую перевернутую.
+
+Псевдокод данного алгоритма
+\begin{lstlisting}
+function divide(r1: Rational, r2: Rational):
+    return normalize(Rational(r1.numerator * r2.denominator,
+        r1.denominator * r2.numerator))
+\end{lstlisting}
+
+\newpage
+
+
+\section{Реализация возведения в степень}
+
+По определению, чтобы возвести число $a$ в 
+рациональную степень $ \frac{n}{m} $ необходимо
+$ a^{\frac{n}{m}} = \sqrt[m]{a^n} $
+
+Получается необходимо реализовать возведения числа в целую $n$. 
+Это можно сделать с помощью \textbf{алгоритма быстрого возведения в степень} \cite{2}
+
+Число $a^n$ можно представить следующим образом
+
+\begin{equation}
+    a ^ n = 
+\begin{cases}
+    (a^2)^{\frac{n}{2}}, & \text{n - четное} \\
+    a \cdot (a^2)^{\frac{n - 1}{2}}, & \text{n - нечетное}
+\end{cases}
+\end{equation}
+
+Следовательно, можно с помощью указанного формулы сократить количество умножений.
+То есть получили алгоритм, работающий за \emph{O($log(n)$)}
+
+Напишем псевдокод данного алгоритма
+
+\begin{lstlisting}
+    function pow(basis: Rational, exponent: int)
+        if exponent == 0:
+            return Rational(1, 1)
+        
+        if exponent % 2 != 1:
+            return pow(basis, exponent - 1) * basis
+        
+        buffer = pow(basis, exponent >> 1)
+        return buffer * buffer
+\end{lstlisting}
+
+Теперь разберемся как найти корень из числа
+
+Для этого воспользуемся методом Ньютона для решения нелинейного уравнения \cite{item1},
+он имеет следующую расчетную формулу $ x_{n + 1} = x_n - \frac{f(x_n)}{f^\prime(x_n)} $
+
+Где $ x_n, x_{n + 1} $ - предыдущее и следующее приближения. 
+
+Данный метод имеет следующий критерий окончания $ \left|x_{n + 1} - x_n \right| < \varepsilon $ 
+Где $ \varepsilon $ - точность, с которой необходимо найти корень
+
+$ x = \sqrt[n]{a} $. \\
+Приведем уравнение к следующему виду
+
+$ x^n - a = 0 $
+
+Тогда мы можем записать следующую расчетную формулу для метода Ньютона
+
+\begin{equation}
+    \begin{split}
+        f(x) &= x^n - a \\
+        f^\prime(x) &= nx^{n - 1} \\
+        x_{n + 1} &= x_n - \frac{x_n^n - a}{nx_n^{n - 1}}
+    \end{split}
+\end{equation}
+
+Теперь запишем псевдокод данного алгоритми
+
+\begin{lstlisting}
+function root(basis: Rational, root: int)
+    precision = Rational(1, 10**12)
+    prev = basis / 2
+    cur = prev - 
+        - (prev**root - basis) / 
+            / (root * prev**(root - 1))
+    while abs(prev - cur) > precision:
+        prev = cur
+        cur =  prev - (prev**root - basis) / 
+          / (root * prev**(root - 1))   
+    return cur
+\end{lstlisting}
+
+
+Таким образом общая функция будет иметь вид
+
+\begin{lstlisting}
+function pow(basis: Rational, exponent: Rational)
+    return root(pow(basis, exponent.numerator), 
+        exponent.denominator)
+\end{lstlisting}
+
+\newpage
+
+\section{Реализация синуса и косинуса с помощью сплайна}
+
+
+\newpage
+
+\section{Реализация решения СЛАУ с помощью $LU$ - разложения}
+
+Вспомним для начала алгоритм всем известного метода Гаусса \cite{item1}
+
+Пусть дана СЛАУ $Ax = b$.
+Матрица $A$ является квадратной порядка $n$
+и матрица системы является невырожденной, то есть
+$ \det A  \neq 0 $. Тогда как известно из курса линейной
+алгебры система имеет единственное решение и его можно найти
+по следующему алгоритму.
+
+\textbf{Прямой ход метода Гаусса}
+
+Всего будет проделано $ n - 1 $ шагов
+
+
+На $k$-ом шаге проделываем следующие операции
+
+\begin{equation}
+    \begin{split}
+        &\mu_{i, k} = \frac{a_{i, k}}{a_{k, k}} \\
+        &a_{i, j} = a_{i, j} - \mu_{i, k} a_{k, j} \\
+        &b_i = b_i - \mu_{i, k}b_k \\
+        & i = k, k + 1, \dots, n \\
+        & j = 1, 2, \dots, n
+    \end{split}
+\end{equation}
+
+
+Прямой ход метода Гаусса можно представить следующим образом. \cite{item1}
+Введем матрицы $M_1$, $M_2$, \dots, $M_{n - 1}$, называемыми \textbf{элементарными матрицами}
+
+\begin{equation}
+        M_1 = \left(
+            \begin{matrix}
+                1 & 0 & 0 & \dots & 0 \\
+                -\mu_{2, 1} & 1 & 0 & \dots & 0 \\
+                -\mu_{3, 1} & 0 & 1 & \dots & 0 \\
+                \dots & \dots & \dots & \dots & \dots \\
+                -\mu_{n - 1, 1} & 0 & 0 & \dots & 1 \\
+                -\mu_{n, 1} & 0 & 0 & \dots & 1 
+            \end{matrix}
+        \right),
+        \dots,
+        M_{n - 1} = \left(
+            \begin{matrix}
+                1 & 0 & 0 & \dots & 0 \\
+                0 & 1 & 0 & \dots & 0 \\
+                0 & 0 & 1 & \dots & 0 \\
+                \dots & \dots & \dots & \dots & \dots \\ 
+                0 & 0 & \dots & 1 & 0 \\
+                0 & 0 & \dots & -\mu_{n, n - 1} & 1 
+            \end{matrix}
+        \right)
+\end{equation}
+
+Тогда прямой код метода Гаусса после 1-шага можно представить в виде $M_1 Ax = M_1 b$ 
+проверяется непосредственной подстановкой
+
+На втором шаге $ M_2 M_1 Ax = M_2 M_1 b $
+
+Всего таких умножений будет $ n - 1 $ 
+И система примет вид
+
+\begin{equation}
+    M_{n - 1} \dots M_2 M_1 Ax = M_{n - 1} \dots M_2 M_1 b 
+\end{equation}
+
+Матрица системы является верхнетреугольной обозначим ее $U$ 
+
+\begin{equation}
+    M_{n - 1} \dots M_2 M_1 A = U
+\end{equation}
+
+
+Тогда используя понятия обратной матрицы получим
+
+\begin{equation}
+    A = M_{1}^{-1} \dots M_{n - 2}^{-1} M_{n - 1}^{-1}U
+\end{equation}
+
+Если исследовать свойства элементарных матриц, то очевидно,
+что все они невырожденные. Поэтому к ним существуют обратные матрицы,
+которые имеют вид
+
+\begin{equation}
+    M_1^{-1} = \left(
+        \begin{matrix}
+            1 & 0 & 0 & \dots & 0 \\
+            \mu_{2, 1} & 1 & 0 & \dots & 0 \\
+            \mu_{3, 1} & 0 & 1 & \dots & 0 \\
+            \dots & \dots & \dots & \dots & \dots \\
+            \mu_{n - 1, 1} & 0 & 0 & \dots & 1 \\
+            \mu_{n, 1} & 0 & 0 & \dots & 1 
+        \end{matrix}
+    \right),
+    \dots,
+    M_{n - 1}^{-1} = \left(
+        \begin{matrix}
+            1 & 0 & 0 & \dots & 0 \\
+            0 & 1 & 0 & \dots & 0 \\
+            0 & 0 & 1 & \dots & 0 \\
+            \dots & \dots & \dots & \dots & \dots \\ 
+            0 & 0 & \dots & 1 & 0 \\
+            0 & 0 & \dots & \mu_{n, n - 1} & 1 
+        \end{matrix}
+    \right)
+\end{equation}
+
+Проверить, что данные матрицы являются обратными можно
+также непосредственной подстановкой. Результирующая обратная матрица
+тогда будет иметь вид
+
+\begin{equation}
+    M_1^{-1} \dots M_{n - 1}^{-1} = \left(
+        \begin{matrix}
+            1 & 0 & 0 & \dots & 0 \\
+            \mu_{2, 1} & 1 & 0 & \dots & 0 \\
+            \mu_{3, 1} & \mu_{3, 2} & 1 & \dots & 0 \\
+            \dots & \dots & \dots & \dots & \dots \\ 
+            \mu_{n, 1} & \mu_{n, 2} & \mu_{n, 3} & \dots & 1
+        \end{matrix}
+    \right)
+\end{equation}
+
+Обозначим ее $ L = M_1^{-1} \dots M_{n - 1}^{-1}$.
+Получим тогда так называемое \textbf{$LU$-разложение матрицы}
+$A = LU$
+
+
+Приведем пример как оно работает 
+
+\textbf{Пример:} Дана матрица $ A $. Найти ее $LU$- разложение
+
+\begin{equation}
+    A = \left(
+        \begin{matrix}
+            9 & 5 & 3 \\
+            -81 & -50 & -25 \\
+            45 & 55 & 7
+        \end{matrix}
+    \right)
+\end{equation}
+
+\textbf{Решение:}
+
+На первом шаге имеем ведущий элемент $ a_{1, 1} = 9 $. И следующие
+коээфициенты $ \mu_{2, 1} = -9, \mu_{3, 1} = 5 $
+
+\begin{equation}
+    A = \left(
+        \begin{matrix}
+            9 & 5 & 3 \\
+            -81 & -50 & -25 \\
+            45 & 55 & 7
+        \end{matrix}
+    \right) \sim
+        \left(
+            \begin{matrix}
+                9 & 5 & 3 \\
+                0 & -5 & 2 \\
+                0 & 30 & -8
+            \end{matrix}
+        \right)
+\end{equation}
+
+На втором шаге имеем имеем ведущий элемент $ a_{2, 2} = -5 $
+и следующий коэффициент $ \mu_{3, 2} = -6 $. Получим тогда следующую систему
+
+\begin{equation}
+    A = \left(
+            \begin{matrix}
+                9 & 5 & 3 \\
+                0 & -5 & 2 \\
+                0 & 30 & -8
+            \end{matrix}
+        \right) \sim 
+        \left(
+            \begin{matrix}
+                9 & 5 & 3 \\
+                0 & -5 & 2 \\
+                0 & 0 & 4
+            \end{matrix}
+        \right)
+\end{equation}
+
+Тогда получим следующим матрицы $L, U$
+
+\begin{equation}
+    L = \left(
+        \begin{matrix}
+            1 & 0 & 0 \\
+            -9 & 1 & 0 \\
+            5 & -6 & 1 
+        \end{matrix}
+    \right), 
+    U = \left(
+        \begin{matrix}
+            9 & 5 & 3 \\
+            0 & 5 & -2 \\
+            0 & 0 & 4
+        \end{matrix}
+    \right)
+\end{equation}
+
+Теперь разберем как решать систему с помощью найденного $LU$-разложения
+
+Имеем следующую СЛАУ $LUx = b$. Введем обозначение $ y = Ux $.
+Тогда сначала мы можем решить СЛАУ $  Ly = b $. А потом найдя
+вектор $y$ смрдем решить СЛАУ $ Ux = y $. Таким образом мы найдем вектор $ x $.
+
+Теперь напишем псевдокод $LU$-разложения 
+
+\begin{lstlisting}
+function LUdecomposition(A: array<array<Rational>>):
+    n = A[0].size
+    U = A
+    L = [[0]  * n]  * n
+    for k = 0 ... n - 2:
+        for i = k + 1 ... n - 1:
+            mu_i_k = U[i][k] / U[k][k]
+            L[i][k] = mu_i_k
+            U[i][k] -= mu_i_k * U[k][k]
+            for j = k + 1 ... n - 1:
+                U[i][j] -= mu_i_k * U[k][j]
+    return L, U
+\end{lstlisting}
+
+Очевидно, что сложность $LU$-разложения \emph{O($n^3$)}
+
+Теперь напишем функцию решающую систему с помощью найденного $LU$ разложения
+
+\begin{lstlisting}
+function solve_system_usingLUdecomposition(L, 
+            U: array<array<Rational>>, 
+            b: array<Rational>):
+    n = L[0].size
+    y = [0] * n
+    y[0] = b[0]
+    for i = 1 ... n - 1:
+        y[i] = b[i]
+        for j = 1 ... i - 1:
+            y[i] -= L[i][j] * y[j]
+
+    x = [0] * n
+    x[n - 1] = y[n - 1] / U[n - 1][n - 1]
+    for i = n - 2 ... 0:
+        cur = y[i]
+        for j = n - 1 ... i + 1:
+            cur -= U[i][j] * x[j]
+        x[i] = cur / U[i][i]
+    return x
+\end{lstlisting}
+
+Очеивдно, что сложность решения системы с помощью
+$LU$-разложения составляет \emph{O($n^2$)}.
+Основное преимущество $LU$-разложения
+состоить в том, что мы можем найти один раз данное разложение 
+для матрицы $A$, а потом решать ее для различных вектором $b$
+
+\newpage
+
+\specialsection{Заключение}
+В результате работы над данным математическим пакетом. Мы получили полноценно 
+работающую библиотеку, которую можно использовать для решения различных математических
+задач. Были проведены юнит-тесты с использованием библиотеки \emph{GoogleTest} \cite{item4}, которые
+показали работоспособность нашей библиотеки.
+Также для того, чтобы убрать платформу-зависимость при сборке весь проект был упакован в \emph{docker container}
+\cite{item5}. В результате для сборки проекта достаточно иметь на своем системе программу \emph{docker}. 
+В будущих планах упаковать нашу библиотеку в \emph{deb-package} \cite{item6}. Для того чтобы иметь возможность 
+установить ее с помощью стандартного пакетного менеджера \emph{apt}  \emph{Ubuntu} и других дистрибутивов \emph{Linux}. 
+С исходным кодом нашей библиотеки можно ознакомиться по следующей 
+ссылке \url{https://github.com/mpeicoursework/course_work.git}
+
+\newpage
+% Библиография в cpsconf стиле
+% Аргумент {1} ниже включает переопределенный стиль с выравниванием слева
+\begin{thebibliography}{1}
+\bibitem{item1} Амосов А. А., Дубинский Ю. А., Копченова Н. В. Вычислительные методы. — 2014.
+\bibitem{item2} Т.Кормен, Ч.Лейзерсон, Р.Ривест, К.Штайн - Алгоритмы. Построение и анализ - 2013.
+\bibitem{item3} Donald E. Knuth - The Art of Computer Programming. Volume 1 - 3 - 1998.
+\bibitem{item4} \url{http://google.github.io/googletest/}
+\bibitem{item5} \url{https://www.docker.com/}
+\bibitem{item6} \url{https://en.wikipedia.org/wiki/Deb_(file_format)}
+\end{thebibliography}
+\end{document}
